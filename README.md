@@ -1,8 +1,8 @@
 # Yalog: Yet Another Logger for CakePHP #
 
-h2. RotateFileLog
+## RotateFileLog ##
 
-h3. Usage
+### Usage ###
 
 First, put `yalog' directory on app/plugins in your CakePHP application.
 Second, add the following code in bootstrap.php.
@@ -13,9 +13,9 @@ Second, add the following code in bootstrap.php.
                           'engine' => 'Yalog.RotateFileLog'
                           ));
 
-h3. Configure
+### Configure ###
 
-h4. Rotate
+#### Rotate ####
 
     <?php
         Configure::write('Yalog.RotateFileLog.weekly', true);
