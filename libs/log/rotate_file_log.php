@@ -4,7 +4,7 @@
    *
    */
 if (!class_exists('File')) {
-    require LIBS . 'file.php';
+    App::import('Lib', 'File');
 }
 
 class RotateFileLog {
