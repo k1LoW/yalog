@@ -8,7 +8,7 @@ First, put `yalog' directory on app/plugins in your CakePHP application.
 Second, add the following code in bootstrap.php.
 
     <?php
-        CakeLog::config('otherFile',
+        CakeLog::config('RotateFileLog',
                     array(
                           'engine' => 'Yalog.RotateFileLog'
                           ));
