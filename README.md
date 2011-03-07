@@ -5,6 +5,7 @@
 ### Usage ###
 
 First, put `yalog' directory on app/plugins in your CakePHP application.
+
 Second, add the following code in bootstrap.php.
 
     <?php
@@ -21,12 +22,14 @@ Second, add the following code in bootstrap.php.
         Configure::write('Yalog.RotateFileLog.weekly', true);
         Configure::write('Yalog.RotateFileLog.rotate', 4);
 
-## Log4php ##
+## Log4php (Sample) ##
 
 ### Usage ###
 
 First, put `yalog' directory on app/plugins in your CakePHP application.
+
 Second, put log4php source directory on app/plugins/yalog/vendors/log4php in your CakePHP application.
+
 Third, add the following code in bootstrap.php.
 
     <?php
