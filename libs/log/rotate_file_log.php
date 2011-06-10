@@ -75,10 +75,28 @@ class RotateFileLog {
         return true;
     }
     
+    /**
+     * _checkLogOutputLevel
+     * check level of log output
+     * Compare the number of log level and the one of output level set in bootstrap.php
+     * 
+     * @param string $type output log level
+     * @return boolean true:output, false:not to do
+     */
     function _checkLogOutputLevel($type) {
         $setLevel = Configure::read('Yalog.OutputLevel');
-        $setLevel = (is_null($setLevel) && is_int($setLevel)) ? LOG_DEBUG : $setLevel;
-
+        
+        // Output all log when it is NULL
+        if (is_null($setLevel)) {
+            return true;
+        }
+        
+        // All output log is stopped when it is false.
+        if ($setLevel === false) {
+            return false;
+        }
+        
+        // Levels converted in CakeLog::write
         $levels = array(
                         'warning' => LOG_WARNING,
                         'notice' => LOG_NOTICE,
@@ -91,9 +109,9 @@ class RotateFileLog {
             $level = $levels[$type];
         } elseif (is_int($type)) {
             $level = $type;
-        } 
-
-        if (isset ($level) && $level > $setLevel) {
+        }
+        
+        if (isset ($level) && ($level > $setLevel)) {
             return false;
         }
         return true;
