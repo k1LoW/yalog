@@ -27,6 +27,10 @@ class RotateFileLog {
      * @return boolean success of write.
      */
     function write($type, $message) {
+        if (!$this->_checkLogOutputLevel($type)) {
+            return ;
+        }
+        
         $debugTypes = array('notice', 'info', 'debug');
         $this->_suffix = date('Ymd');
         if (Configure::read('Yalog.RotateFileLog.monthly') == true) {
@@ -70,4 +74,29 @@ class RotateFileLog {
         }
         return true;
     }
+    
+    function _checkLogOutputLevel($type) {
+        $setLevel = Configure::read('Yalog.OutputLevel');
+        $setLevel = (is_null($setLevel) && is_int($setLevel)) ? LOG_DEBUG : $setLevel;
+
+        $levels = array(
+                        'warning' => LOG_WARNING,
+                        'notice' => LOG_NOTICE,
+                        'info' => LOG_INFO,
+                        'debug' => LOG_DEBUG,
+                        'error' => LOG_ERROR
+                    );
+        
+        if (isset($levels[$type])) {
+            $level = $levels[$type];
+        } elseif (is_int($type)) {
+            $level = $type;
+        } 
+
+        if (isset ($level) && $level > $setLevel) {
+            return false;
+        }
+        return true;
+    }
+
 }
