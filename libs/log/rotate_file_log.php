@@ -104,13 +104,18 @@ class RotateFileLog {
                         'debug' => LOG_DEBUG,
                         'error' => LOG_ERROR
                     );
+
+        // Output all logs when there is not $setLevel in levels converted in CakeLog::write
+        if (!is_int($setLevel) && !in_array($setLevel, $levels)) {
+            return true;
+        }
         
         if (isset($levels[$type])) {
             $level = $levels[$type];
         } elseif (is_int($type)) {
             $level = $type;
         }
-        
+
         if (isset ($level) && ($level > $setLevel)) {
             return false;
         }
