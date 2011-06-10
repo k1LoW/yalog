@@ -44,3 +44,12 @@ Modify following,
 
 - app/plugins/yalog/libs/log/log4php.properties
 - Log4php::write() in app/plugins/yalog/libs/log/log4php.php 
+        
+## Adjust level of log output ##
+
+### Usage ###
+
+add the following code of the level that you want to output the log in bootstrap.php.
+        
+    <?php
+        CakeLog::config('Yalog..OutputLevel', LOG_WARNING);
