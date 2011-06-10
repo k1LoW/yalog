@@ -27,6 +27,10 @@ class RotateFileLog {
      * @return boolean success of write.
      */
     function write($type, $message) {
+        if (!$this->_checkLogOutputLevel($type)) {
+            return ;
+        }
+        
         $debugTypes = array('notice', 'info', 'debug');
         $this->_suffix = date('Ymd');
         if (Configure::read('Yalog.RotateFileLog.monthly') == true) {
@@ -70,4 +74,52 @@ class RotateFileLog {
         }
         return true;
     }
+    
+    /**
+     * _checkLogOutputLevel
+     * check level of log output
+     * Compare the number of log level and the one of output level set in bootstrap.php
+     * 
+     * @param string $type output log level
+     * @return boolean true:output, false:not to do
+     */
+    function _checkLogOutputLevel($type) {
+        $setLevel = Configure::read('Yalog.OutputLevel');
+        
+        // Output all log when it is NULL
+        if (is_null($setLevel)) {
+            return true;
+        }
+        
+        // All output log is stopped when it is false.
+        if ($setLevel === false) {
+            return false;
+        }
+        
+        // Levels converted in CakeLog::write
+        $levels = array(
+                        'warning' => LOG_WARNING,
+                        'notice' => LOG_NOTICE,
+                        'info' => LOG_INFO,
+                        'debug' => LOG_DEBUG,
+                        'error' => LOG_ERROR
+                    );
+
+        // Output all logs when there is not $setLevel in levels converted in CakeLog::write
+        if (!is_int($setLevel) && !in_array($setLevel, $levels)) {
+            return true;
+        }
+        
+        if (isset($levels[$type])) {
+            $level = $levels[$type];
+        } elseif (is_int($type)) {
+            $level = $type;
+        }
+
+        if (isset ($level) && ($level > $setLevel)) {
+            return false;
+        }
+        return true;
+    }
+
 }
