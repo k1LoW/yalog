@@ -1,16 +1,19 @@
 <?php
-  /**
-   * Log4php sample
-   *
-   */
-require_once(dirname(__FILE__) . '/../../vendors/log4php/Logger.php');
+App::uses('CakeLogInterface', 'Log');
+
+/**
+ * Log4php sample
+ *
+ */
+//require_once(dirname(__FILE__) . '/../../../Vendor/log4php/Logger.php');
+App::import('Vendor', 'Yalog.log4php/Logger');
 Logger::configure(dirname(__FILE__) . '/log4php.properties');
 
 if (!class_exists('File')) {
-    App::import('Lib', 'File');
+    App::uses('File', 'Utility');
 }
 
-class Log4php {
+class Log4php implements CakeLogInterface {
 
     private $logger;
 
@@ -21,7 +24,7 @@ class Log4php {
      * @param string $message The message you want to log.
      * @return boolean success of write.
      */
-    function write($type, $message) {
+    public function write($type, $message) {
         $this->logger = Logger::getLogger('log');
         return $this->logger->{$type}($message);
     }

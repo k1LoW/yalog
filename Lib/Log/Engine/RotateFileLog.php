@@ -1,20 +1,22 @@
 <?php
-  /**
-   * File Storage stream for Logging with log rotate
-   *
-   */
+App::uses('CakeLogInterface', 'Log');
+
+/**
+ * File Storage stream for Logging with log rotate
+ *
+ */
 if (!class_exists('File')) {
-    App::import('Lib', 'File');
+    App::uses('File', 'Utility');
 }
 
-class RotateFileLog {
+class RotateFileLog implements CakeLogInterface {
 
-    var $_path = null;
-    var $_prefix = 'error';
-    var $_suffix = '';
-    var $_rotate = null;
+    protected $_path = null;
+    protected $_prefix = 'error';
+    protected $_suffix = '';
+    protected $_rotate = null;
 
-    function RotateFileLog($options = array()) {
+	public function __construct($options = array()) {
         $options += array('path' => LOGS);
         $this->_path = $options['path'];
     }
@@ -26,7 +28,7 @@ class RotateFileLog {
      * @param string $message The message you want to log.
      * @return boolean success of write.
      */
-    function write($type, $message) {
+    public function write($type, $message) {
         if (!$this->_checkLogOutputLevel($type)) {
             return ;
         }
@@ -83,7 +85,7 @@ class RotateFileLog {
      * @param string $type output log level
      * @return boolean true:output, false:not to do
      */
-    function _checkLogOutputLevel($type) {
+    private function _checkLogOutputLevel($type) {
         $setLevel = Configure::read('Yalog.OutputLevel');
         
         // Output all log when it is NULL

@@ -1,14 +1,20 @@
-# Yalog: Yet Another Logger for CakePHP #
+# Yalog: Yet Another Logger for CakePHP2.0RC3 #
 
 ## RotateFileLog ##
 
 ### Usage ###
 
-First, put `yalog' directory on app/plugins in your CakePHP application.
+First, put `Yalog' directory on app/Plugin in your CakePHP application.
 
 Second, add the following code in bootstrap.php.
 
     <?php
+    
+        CakePlugin::load('Yalog');
+        // or
+        // CakePlugin::loadAll();
+
+        App::uses('CakeLog', 'Log');
         CakeLog::config('RotateFileLog',
                     array(
                           'engine' => 'Yalog.RotateFileLog'
@@ -26,10 +32,12 @@ Second, add the following code in bootstrap.php.
 
 ### Usage ###
 
-First, put `yalog' directory on app/plugins in your CakePHP application.
+First, put `Yalog' directory on app/Plugin in your CakePHP application.
 
-Second, put log4php source directory on app/plugins/yalog/vendors/log4php in your CakePHP application.
+Second, put log4php source directory on app/Plugin/Yalog/Vendor/log4php in your CakePHP application.
 
+        http://logging.apache.org/log4php/download.html
+        
 Third, add the following code in bootstrap.php.
 
     <?php
@@ -42,8 +50,8 @@ Third, add the following code in bootstrap.php.
 
 Modify following,
 
-- app/plugins/yalog/libs/log/log4php.properties
-- Log4php::write() in app/plugins/yalog/libs/log/log4php.php 
+- app/Plugin/Yalog/Lib/Log/Engine/log4php.properties
+- Log4php::write() in app/Plugin/Yalog/Lib/Log/Engine/log4php.php 
         
 ## Adjust level of log output ##
 
