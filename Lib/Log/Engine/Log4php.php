@@ -24,7 +24,7 @@ class Log4php implements CakeLogInterface {
      * @param string $message The message you want to log.
      * @return boolean success of write.
      */
-    function write($type, $message) {
+    public function write($type, $message) {
         $this->logger = Logger::getLogger('log');
         return $this->logger->{$type}($message);
     }
