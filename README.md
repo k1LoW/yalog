@@ -72,4 +72,6 @@ All output is stopped when it is set to false.
     <?php
         CakeLog::config('Yalog..OutputLevel', false);
 
-        
+## License
+
+MIT License
