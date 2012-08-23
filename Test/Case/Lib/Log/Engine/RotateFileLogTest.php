@@ -31,9 +31,12 @@ class RotateFileLogTestCase extends CakeTestCase {
                                           'type' => array('test_log_type'),
                                           'file' => 'test_debug',
                                           ));
-        CakeLog::write('test_log_type', 'testFileLog');
+        $hash = sha1(time() . 'testFileLog');
+        CakeLog::write('test_log_type', $hash);
         $logPath = LOGS . 'test_debug.log';
         $this->assertTrue(file_exists($logPath));
+        $log = file_get_contents($logPath);
+        $this->assertTrue(strpos($log, $hash) > 0);
         @unlink($logPath);
     }
 
@@ -47,9 +50,12 @@ class RotateFileLogTestCase extends CakeTestCase {
                                                  'type' => array('test_rotate_log_type'),
                                                  'file' => 'test_debug',
                                                  ));
-        CakeLog::write('test_rotate_log_type', 'testRotateFileLog');
+        $hash = sha1(time() . 'testRotateFileLog');
+        CakeLog::write('test_rotate_log_type', $hash);
         $logPath = LOGS . 'test_debug_' . date('Ymd') . '.log';
         $this->assertTrue(file_exists($logPath));
+        $log = file_get_contents($logPath);
+        $this->assertTrue(strpos($log, $hash) > 0);
         @unlink($logPath);
     }
 }
