@@ -56,8 +56,9 @@ class RotateFileLog extends FileLog {
         }
 
         $this->_prefix = preg_replace('/\.([^\.]+)$/', '', $filename);
+        $extension = end(explode('.', $filename));
 
-        $filename = $this->_path . $this->_prefix . '_' . $this->_suffix .'.log';
+        $filename = $this->_path . $this->_prefix . '_' . $this->_suffix . (!empty($extension) ? '.' . $extension : '');
         $output = date('Y-m-d H:i:s') . ' ' . ucfirst($type) . ': ' . $message . "\n";
         $log = new File($filename, true);
         // Write Log
@@ -70,16 +71,25 @@ class RotateFileLog extends FileLog {
         // Rotate log
         if (Configure::read('Yalog.RotateFileLog.rotate')) {
             $this->_rotate = Configure::read('Yalog.RotateFileLog.rotate');
-            $logs = glob($this->_path . $this->_prefix . '_*.log');
+            $logs = glob($this->_path . $this->_prefix . '_*'. (!empty($extension) ? '.' . $extension : ''));
             while(count($logs) > $this->_rotate) {
-                $deleteLog = new File($logs[0], true);
-                if (!$deleteLog->delete()) {
+                if (!$this->_removeLog($logs[0])) {
                     return false;
                 }
                 array_shift($logs);
             }
         }
         return true;
+    }
+
+    /**
+     * _removeLog
+     *
+     * @param $filePath
+     */
+    private function _removeLog($filePath){
+        $deleteLog = new File($filePath, true);
+        return $deleteLog->delete();
     }
 
     /**
