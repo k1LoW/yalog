@@ -1,5 +1,7 @@
 # Yalog: Yet Another Logger for CakePHP2.x #
 
+[![Build Status](https://secure.travis-ci.org/k1LoW/yalog.png?branch=2.0)](http://travis-ci.org/k1LoW/yalog)
+
 ## RotateFileLog ##
 
 ### Usage ###
