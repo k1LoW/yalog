@@ -17,6 +17,8 @@ class RotateFileLog extends FileLog {
     protected $_suffix = '';
     protected $_rotate = null;
 
+    const STORAGE_S3 = 'S3';
+
     /**
      * Implements writing to log files.
      *
@@ -88,6 +90,50 @@ class RotateFileLog extends FileLog {
      * @param $filePath
      */
     private function _removeLog($filePath){
+        if (Configure::read('Yalog.RotateFileLog.backup') == RotateFileLog::STORAGE_S3) {
+            return $this->_moveLogS3($filePath);
+        }
+        $deleteLog = new File($filePath, true);
+        return $deleteLog->delete();
+    }
+
+    /**
+     * _moveLogS3
+     *
+     * @param $filePath
+     */
+    private function _moveLogS3($filePath){
+        if (!class_exists('AmazonS3')
+            || !Configure::read('Yalog.S3.key')
+            || !Configure::read('Yalog.S3.secret')
+            || !Configure::read('Yalog.S3.bucket')) {
+            return false;
+        }
+        $fileName = basename($filePath);
+        $options = array('key' => Configure::read('Yalog.S3.key'),
+                         'secret' => Configure::read('Yalog.S3.secret'),
+                         );
+        $bucket = Configure::read('Yalog.S3.bucket');
+        $s3 = new AmazonS3($options);
+        $region = Configure::read('Yalog.S3.region');
+        if (!empty($region)) {
+            $s3->set_region($region);
+        }
+        $acl = Configure::read('Yalog.S3.acl');
+        if (empty($acl)) {
+            $acl = AmazonS3::ACL_PRIVATE;
+        }
+        $urlPrefix = Configure::read('Yalog.S3.urlPrefix');
+        $responce = $s3->create_object($bucket,
+                                       $urlPrefix . $fileName,
+                                       array(
+                                             'fileUpload' => $filePath,
+                                             'acl' => $acl,
+                                             ));
+        if (!$responce->isOK()) {
+            //__('Validation Error: S3 Upload Error');
+            return false;
+        }
         $deleteLog = new File($filePath, true);
         return $deleteLog->delete();
     }
