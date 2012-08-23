@@ -15,7 +15,7 @@ before_script:
   - chmod -R 777 ./cakephp/app/tmp
   - echo "<?php
     App::build(array(
-    'Plugin' => array('/home/vagrant/builds/fusic/'),
+    'Plugin' => array('/home/vagrant/builds/k1LoW/'),
     ));
     CakePlugin::loadAll();
     " > cakephp/app/Config/bootstrap.php
