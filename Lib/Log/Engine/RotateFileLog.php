@@ -49,7 +49,7 @@ class RotateFileLog extends FileLog {
             $filename = 'error.log';
         } elseif (in_array($type, $debugTypes)) {
             $filename = 'debug.log';
-        } elseif (is_set($this->_config) && in_array($type, $this->_config['scopes'])) { // 2.1.x compatible
+        } elseif (isset($this->_config) && in_array($type, $this->_config['scopes'])) { // 2.1.x compatible
             $filename = $this->_file;
         } else {
             $filename = $type . '.log';
