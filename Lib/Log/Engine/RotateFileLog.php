@@ -1,5 +1,6 @@
 <?php
 App::uses('CakeLogInterface', 'Log');
+App::uses('FileLog', 'Log/Engine');
 
 /**
  * File Storage stream for Logging with log rotate
@@ -9,17 +10,12 @@ if (!class_exists('File')) {
     App::uses('File', 'Utility');
 }
 
-class RotateFileLog implements CakeLogInterface {
+class RotateFileLog extends FileLog {
 
     protected $_path = null;
     protected $_prefix = 'error';
     protected $_suffix = '';
     protected $_rotate = null;
-
-	public function __construct($options = array()) {
-        $options += array('path' => LOGS);
-        $this->_path = $options['path'];
-    }
 
     /**
      * Implements writing to log files.
@@ -32,7 +28,7 @@ class RotateFileLog implements CakeLogInterface {
         if (!$this->_checkLogOutputLevel($type)) {
             return ;
         }
-        
+
         $debugTypes = array('notice', 'info', 'debug');
         $this->_suffix = date('Ymd');
         if (Configure::read('Yalog.RotateFileLog.monthly') == true) {
@@ -45,13 +41,22 @@ class RotateFileLog implements CakeLogInterface {
                 $this->_suffix = date('Ymd', strtotime('-' . date('w') . ' day')) . 'w';
             }
         }
-        if ($type == 'error' || $type == 'warning') {
-            $this->_prefix = 'error';
+
+        // @see FileLog::write()
+        if (!empty($this->_file)) {
+            $filename = $this->_file;
+        } elseif ($type == 'error' || $type == 'warning') {
+            $filename = 'error.log';
         } elseif (in_array($type, $debugTypes)) {
-            $this->_prefix = 'debug';
+            $filename = 'debug.log';
+        } elseif (in_array($type, $this->_config['scopes'])) {
+            $filename = $this->_file;
         } else {
-            $this->_prefix = $type;
+            $filename = $type . '.log';
         }
+
+        $this->_prefix = preg_replace('/\.([^\.]+)$/', '', $filename);
+
         $filename = $this->_path . $this->_prefix . '_' . $this->_suffix .'.log';
         $output = date('Y-m-d H:i:s') . ' ' . ucfirst($type) . ': ' . $message . "\n";
         $log = new File($filename, true);
@@ -76,28 +81,28 @@ class RotateFileLog implements CakeLogInterface {
         }
         return true;
     }
-    
+
     /**
      * _checkLogOutputLevel
      * check level of log output
      * Compare the number of log level and the one of output level set in bootstrap.php
-     * 
+     *
      * @param string $type output log level
      * @return boolean true:output, false:not to do
      */
     private function _checkLogOutputLevel($type) {
         $setLevel = Configure::read('Yalog.OutputLevel');
-        
+
         // Output all log when it is NULL
         if (is_null($setLevel)) {
             return true;
         }
-        
+
         // All output log is stopped when it is false.
         if ($setLevel === false) {
             return false;
         }
-        
+
         // Levels converted in CakeLog::write
         $levels = array(
                         'warning' => LOG_WARNING,
@@ -111,7 +116,7 @@ class RotateFileLog implements CakeLogInterface {
         if (!is_int($setLevel) && !in_array($setLevel, $levels)) {
             return true;
         }
-        
+
         if (isset($levels[$type])) {
             $level = $levels[$type];
         } elseif (is_int($type)) {

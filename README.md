@@ -1,4 +1,4 @@
-# Yalog: Yet Another Logger for CakePHP2.0RC3 #
+# Yalog: Yet Another Logger for CakePHP2.x #
 
 ## RotateFileLog ##
 
@@ -15,10 +15,17 @@ Second, add the following code in bootstrap.php.
         // CakePlugin::loadAll();
 
         App::uses('CakeLog', 'Log');
-        CakeLog::config('RotateFileLog',
-                    array(
-                          'engine' => 'Yalog.RotateFileLog'
-                          ));
+        CakeLog::config('debug', array(
+            'engine' => 'Yalog.RotateFileLog',
+            'types' => array('notice', 'info', 'debug'),
+            'file' => 'debug',
+        ));
+        CakeLog::config('error', array(
+            'engine' => 'Yalog.RotateFileLog',
+            'types' => array('warning', 'error', 'critical', 'alert', 'emergency'),
+            'file' => 'error',
+        ));
+
 
 ### Configure ###
 
@@ -41,10 +48,16 @@ Second, put log4php source directory on app/Plugin/Yalog/Vendor/log4php in your 
 Third, add the following code in bootstrap.php.
 
     <?php
-        CakeLog::config('Log4php',
-                    array(
-                          'engine' => 'Yalog.Log4php'
-                          ));
+        CakeLog::config('debug', array(
+            'engine' => 'Yalog.Log4php',
+            'types' => array('notice', 'info', 'debug'),
+            'file' => 'debug',
+        ));
+        CakeLog::config('error', array(
+            'engine' => 'Yalog.Log4php',
+            'types' => array('warning', 'error', 'critical', 'alert', 'emergency'),
+            'file' => 'error',
+        ));
 
 ### Configure ###
 
@@ -53,14 +66,14 @@ Modify following,
 - app/Plugin/Yalog/Lib/Log/Engine/log4php.properties
 - Log4php::write() in app/Plugin/Yalog/Lib/Log/Engine/log4php.php 
         
-## Adjust level of log output ##
+## Adjust level of log output (DEPRECATED) ##
 
 ### Usage ###
 
 Add the following code in bootstrap.php.
 
     <?php
-        CakeLog::config('Yalog..OutputLevel', LOG_WARNING);
+        Configure::write('Yalog.OutputLevel, LOG_WARNING);
 
 Set lower level than level that you want to output the log at.
 (LOG_ERROR:2 > LOG_WARNING:4 > LOG_NOTICE:5 > LOG_INFO:6 > LOG_DEBUG:7)
@@ -70,7 +83,7 @@ In the example, log of "LOG_ERROR", "LOG_WARNING" and the others are output.
 All output is stopped when it is set to false.
         
     <?php
-        CakeLog::config('Yalog..OutputLevel', false);
+        Configure::write('Yalog.OutputLevel, false);
 
 ## License
 
