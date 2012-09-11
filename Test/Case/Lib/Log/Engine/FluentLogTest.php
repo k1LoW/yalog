@@ -51,7 +51,7 @@ class FluentLogTestCase extends CakeTestCase {
      *
      */
     public function testFluentLog(){
-        CakeLog::config('test_rotate_log', array(
+        CakeLog::config('test_fluent_log', array(
                                                  'engine' => 'Yalog.FluentLog',
                                                  'type' => array('debug.type'),
                                                  'file' => 'test_debug',
@@ -59,5 +59,35 @@ class FluentLogTestCase extends CakeTestCase {
         $hash = sha1(time() . 'testFluentLog');
         $result = CakeLog::write('debug.type', $hash);
         $this->assertTrue($result);
+    }
+
+    /**
+     * testMultiLog
+     *
+     */
+    public function testMultiLog(){
+        CakeLog::config('test_log', array(
+                                          'engine' => 'FileLog',
+                                          'type' => array('debug.type'),
+                                          'file' => 'test_debug',
+                                          ));
+        CakeLog::config('test_fluent_log', array(
+                                                 'engine' => 'Yalog.FluentLog',
+                                                 'type' => array('debug.type'),
+                                                 ));
+        $hash = sha1(time() . 'testMultiLog');
+        $result = CakeLog::write('debug.type', $hash);
+        $this->assertTrue($result);
+
+        if (preg_match('/^2\.2\./', Configure::version())) {
+            $logPath = LOGS . 'test_debug.log';
+        } else {
+            // CakePHP 2.1.x
+            $logPath = LOGS . 'debug.type.log';
+        }
+        $this->assertTrue(file_exists($logPath));
+        $log = file_get_contents($logPath);
+        $this->assertTrue(strpos($log, $hash) > 0);
+        @unlink($logPath);
     }
 }
