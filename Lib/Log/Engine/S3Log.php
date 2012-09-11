@@ -10,12 +10,13 @@ if (!class_exists('File')) {
     App::uses('File', 'Utility');
 }
 
-class RotateFileLog extends FileLog {
+class S3Log extends FileLog {
 
     protected $_path = null;
     protected $_prefix = 'error';
     protected $_suffix = '';
     protected $_rotate = null;
+    protected $_bufferPrefix = 's3_buffer_';
 
     /**
      * Implements writing to log files.
@@ -27,10 +28,10 @@ class RotateFileLog extends FileLog {
     public function write($type, $message) {
         $debugTypes = array('notice', 'info', 'debug');
         $this->_suffix = date('Ymd');
-        if (Configure::read('Yalog.RotateFileLog.monthly') == true) {
+        if (Configure::read('Yalog.S3Log.monthly') == true) {
             $this->_suffix = date('Ym');
         }
-        if (Configure::read('Yalog.RotateFileLog.weekly') == true) {
+        if (Configure::read('Yalog.S3Log.weekly') == true) {
             if (date('w') == 0) {
                 $this->_suffix = date('Ymd') . 'w';
             } else {
@@ -51,6 +52,9 @@ class RotateFileLog extends FileLog {
             $filename = $type . '.log';
         }
 
+        // Add buffer prefix
+        $filename = $this->_bufferPrefix . $filename;
+
         $this->_prefix = preg_replace('/\.([^\.]+)$/', '', $filename);
         $extension = end(explode('.', $filename));
 
@@ -64,26 +68,55 @@ class RotateFileLog extends FileLog {
         if (!$log->append($output)) {
             return false;
         }
-        // Rotate log
-        if (Configure::read('Yalog.RotateFileLog.rotate')) {
-            $this->_rotate = Configure::read('Yalog.RotateFileLog.rotate');
-            $logs = glob($this->_path . $this->_prefix . '_*'. (!empty($extension) ? '.' . $extension : ''));
-            while(count($logs) > $this->_rotate) {
-                if (!$this->_removeLog($logs[0])) {
-                    return false;
-                }
-                array_shift($logs);
+
+        // upload to S3
+        $logs = glob($this->_path . $this->_prefix . '_*'. (!empty($extension) ? '.' . $extension : ''));
+        while(count($logs) > 1) {
+            if (!$this->_moveLogS3($logs[0])) {
+                return false;
             }
+            array_shift($logs);
         }
         return true;
     }
 
     /**
-     * _removeLog
+     * _moveLogS3
      *
      * @param $filePath
      */
-    private function _removeLog($filePath){
+    private function _moveLogS3($filePath){
+        if (!class_exists('AmazonS3')
+            || !Configure::read('Yalog.S3Log.key')
+            || !Configure::read('Yalog.S3Log.secret')
+            || !Configure::read('Yalog.S3Log.bucket')) {
+            return false;
+        }
+        $fileName = preg_replace('/' . $this->_bufferPrefix . '/', '', basename($filePath));
+        $options = array('key' => Configure::read('Yalog.S3Log.key'),
+                         'secret' => Configure::read('Yalog.S3Log.secret'),
+                         );
+        $bucket = Configure::read('Yalog.S3Log.bucket');
+        $s3 = new AmazonS3($options);
+        $region = Configure::read('Yalog.S3Log.region');
+        if (!empty($region)) {
+            $s3->set_region($region);
+        }
+        $acl = Configure::read('Yalog.S3Log.acl');
+        if (empty($acl)) {
+            $acl = AmazonS3::ACL_PRIVATE;
+        }
+        $urlPrefix = Configure::read('Yalog.S3Log.urlPrefix');
+        $responce = $s3->create_object($bucket,
+                                       $urlPrefix . $fileName,
+                                       array(
+                                             'fileUpload' => $filePath,
+                                             'acl' => $acl,
+                                             ));
+        if (!$responce->isOK()) {
+            //__('Validation Error: S3 Upload Error');
+            return false;
+        }
         $deleteLog = new File($filePath, true);
         return $deleteLog->delete();
     }
