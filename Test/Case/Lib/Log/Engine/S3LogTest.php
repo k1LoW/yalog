@@ -28,17 +28,17 @@ class S3LogTestCase extends CakeTestCase {
      */
     public function testFileLog(){
         CakeLog::config('test_log', array(
-                                          'engine' => 'FileLog',
-                                          'type' => array('test_log_type'),
-                                          'file' => 'test_debug',
-                                          ));
+                'engine' => 'FileLog',
+                'type' => array('test_log_type'),
+                'file' => 'test_debug',
+            ));
         $hash = sha1(time() . 'testFileLog');
         CakeLog::write('test_log_type', $hash);
-        if (preg_match('/^2\.2\./', Configure::version())) {
-            $logPath = LOGS . 'test_debug.log';
-        } else {
+        if (preg_match('/^2\.1\./', Configure::version())) {
             // CakePHP 2.1.x
             $logPath = LOGS . 'test_log_type.log';
+        } else {
+            $logPath = LOGS . 'test_debug.log';
         }
 
         $this->assertTrue(file_exists($logPath));
@@ -57,10 +57,10 @@ class S3LogTestCase extends CakeTestCase {
         }
 
         CakeLog::config('test_s3_log', array(
-                                                 'engine' => 'Yalog.S3Log',
-                                                 'type' => array('test_s3_log_type'),
-                                                 'file' => 'test_debug',
-                                                 ));
+                'engine' => 'Yalog.S3Log',
+                'type' => array('test_s3_log_type'),
+                'file' => 'test_debug',
+            ));
         Configure::write('Yalog.S3Log.key', AWS_ACCESS_KEY);
         Configure::write('Yalog.S3Log.secret', AWS_SECRET_ACCESS_KEY);
         Configure::write('Yalog.S3Log.bucket', AWS_S3_BUCKET);
@@ -68,11 +68,11 @@ class S3LogTestCase extends CakeTestCase {
         Configure::write('Yalog.S3Log.urlPrefix', 'test_logs/');
 
         $hash = sha1(time() . 'testS3Log');
-        if (preg_match('/^2\.2\./', Configure::version())) {
-            $prefix = 's3_buffer_' . 'test_debug_';
-        } else {
+        if (preg_match('/^2\.1\./', Configure::version())) {
             // CakePHP 2.1.x
             $prefix = 's3_buffer_' . 'test_s3_log_type_';
+        } else {
+            $prefix = 's3_buffer_' . 'test_debug_';
         }
         for ($i = 1; $i <= 5; $i++) {
             $logPath = LOGS . $prefix . date('Ymd', strtotime('-' . $i . 'day')) . '.log';

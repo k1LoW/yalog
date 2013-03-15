@@ -33,11 +33,11 @@ class RotateFileLogTestCase extends CakeTestCase {
                                           ));
         $hash = sha1(time() . 'testFileLog');
         CakeLog::write('test_log_type', $hash);
-        if (preg_match('/^2\.2\./', Configure::version())) {
-            $logPath = LOGS . 'test_debug.log';
-        } else {
+        if (preg_match('/^2\.1\./', Configure::version())) {
             // CakePHP 2.1.x
             $logPath = LOGS . 'test_log_type.log';
+        } else {
+            $logPath = LOGS . 'test_debug.log';
         }
 
         $this->assertTrue(file_exists($logPath));
@@ -58,11 +58,11 @@ class RotateFileLogTestCase extends CakeTestCase {
                                                  ));
         $hash = sha1(time() . 'testRotateFileLog');
         CakeLog::write('test_rotate_log_type', $hash);
-        if (preg_match('/^2\.2\./', Configure::version())) {
-            $prefix = 'test_debug_';
-        } else {
+        if (preg_match('/^2\.1\./', Configure::version())) {
             // CakePHP 2.1.x
             $prefix = 'test_rotate_log_type_';
+        } else {
+            $prefix = 'test_debug_';
         }
         $logPath = LOGS . $prefix . date('Ymd') . '.log';
         $this->assertTrue(file_exists($logPath));
@@ -84,11 +84,11 @@ class RotateFileLogTestCase extends CakeTestCase {
                                                  ));
         Configure::write('Yalog.RotateFileLog.rotate', 5);
         $hash = sha1(time() . 'testRotateFileLog');
-        if (preg_match('/^2\.2\./', Configure::version())) {
-            $prefix = 'test_debug_';
-        } else {
+        if (preg_match('/^2\.1\./', Configure::version())) {
             // CakePHP 2.1.x
             $prefix = 'test_rotate_log_type_';
+        } else {
+            $prefix = 'test_debug_';
         }
         for ($i = 1; $i <= 5; $i++) {
             $logPath = LOGS . $prefix . date('Ymd', strtotime('-' . $i . 'day')) . '.log';
