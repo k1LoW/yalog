@@ -22,6 +22,10 @@ class RotateFileLog extends FileLog {
                 'mode' => 0644,
             ), $config);
         parent::__construct($config);
+
+        if (!isset($this->_config)) {
+            $this->_mode = $config['mode'];
+        }
     }
 
     /**
@@ -73,9 +77,10 @@ class RotateFileLog extends FileLog {
             umask($currentMask);
             return false;
         }
-        if (!empty($this->_mode)) {
+
+        if (!empty($this->_mode)) { // 2.1.x compatible
             $mode = $this->_mode;
-        } elseif (isset($this->_config)) { // 2.1.x compatible
+        } elseif (isset($this->_config)) {
             $mode = $this->_config['mode'];
         } else {
             $mode = 0644;
