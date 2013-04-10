@@ -18,11 +18,10 @@ class RotateFileLog extends FileLog {
     protected $_rotate = null;
 
     public function __construct($config = array()) {
-        parent::__construct($config);
         $config = array_merge(array(
                 'mode' => 0644,
-            ), $this->_config);
-        $config = $this->config($config);
+            ), $config);
+        parent::__construct($config);
     }
 
     /**
@@ -74,7 +73,14 @@ class RotateFileLog extends FileLog {
             umask($currentMask);
             return false;
         }
-        if (!$log->append($output) || !chmod($filename, $this->_config['mode'])) {
+        if (!empty($this->_mode)) {
+            $mode = $this->_mode;
+        } elseif (isset($this->_config)) { // 2.1.x compatible
+            $mode = $this->_config['mode'];
+        } else {
+            $mode = 0644;
+        }
+        if (!$log->append($output) || !chmod($filename, $mode)) {
             umask($currentMask);
             return false;
         }
