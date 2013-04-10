@@ -17,6 +17,14 @@ class RotateFileLog extends FileLog {
     protected $_suffix = '';
     protected $_rotate = null;
 
+    public function __construct($config = array()) {
+        parent::__construct($config);
+        $config = Hash::merge(array(
+                'mode' => 0644,
+            ), $this->_config);
+        $config = $this->config($config);
+    }
+
     /**
      * Implements writing to log files.
      *
@@ -56,14 +64,22 @@ class RotateFileLog extends FileLog {
 
         $filename = $this->_path . $this->_prefix . '_' . $this->_suffix . (!empty($extension) ? '.' . $extension : '');
         $output = date('Y-m-d H:i:s') . ' ' . ucfirst($type) . ': ' . $message . "\n";
+
+        $currentMask = umask();
+        umask(0);
         $log = new File($filename, true);
+
         // Write Log
         if (!$log->writable()) {
+            umask($currentMask);
             return false;
         }
-        if (!$log->append($output)) {
+        if (!$log->append($output) || !chmod($filename, $this->_config['mode'])) {
+            umask($currentMask);
             return false;
         }
+        umask($currentMask);
+
         // Rotate log
         if (Configure::read('Yalog.RotateFileLog.rotate')) {
             $this->_rotate = Configure::read('Yalog.RotateFileLog.rotate');
