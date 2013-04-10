@@ -19,7 +19,7 @@ class RotateFileLog extends FileLog {
 
     public function __construct($config = array()) {
         parent::__construct($config);
-        $config = Hash::merge(array(
+        $config = array_merge(array(
                 'mode' => 0644,
             ), $this->_config);
         $config = $this->config($config);
