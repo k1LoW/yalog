@@ -114,27 +114,8 @@ class RotateFileLogTestCase extends CakeTestCase {
      *
      */
     public function testRotateFileLogWithMask(){
-        CakeLog::config('test_rotate_log', array(
-                'engine' => 'Yalog.RotateFileLog',
-                'type' => array('test_rotate_log_type'),
-                'file' => 'test_debug',
-            ));
-        $hash = sha1(time() . 'testRotateFileLog');
-        CakeLog::write('test_rotate_log_type', $hash);
-        if (preg_match('/^2\.1\./', Configure::version())) {
-            // CakePHP 2.1.x
-            $prefix = 'test_rotate_log_type_';
-        } else {
-            $prefix = 'test_debug_';
-        }
-        $logPath = LOGS . $prefix . date('Ymd') . '.log';
-        $this->assertTrue(file_exists($logPath));
 
-        clearstatcache();
-        $perms = substr(sprintf('%o', fileperms($logPath)), -4);
-        $this->assertIdentical($perms, '0644');
-        @unlink($logPath);
-
+        // jpn: 新規作成時のみmodeが発動するのでログファイルが0777になる
         CakeLog::config('test_rotate_log', array(
                 'engine' => 'Yalog.RotateFileLog',
                 'type' => array('test_rotate_log_type'),
@@ -155,6 +136,29 @@ class RotateFileLogTestCase extends CakeTestCase {
         clearstatcache();
         $perms = substr(sprintf('%o', fileperms($logPath)), -4);
         $this->assertIdentical($perms, '0777');
+
+        // jpn: 新規作成時のみmodeが発動するのでmodeを設定してもログファイル0777のまま
+        CakeLog::config('test_rotate_log', array(
+                'engine' => 'Yalog.RotateFileLog',
+                'type' => array('test_rotate_log_type'),
+                'file' => 'test_debug',
+                'mode' => 0644
+            ));
+        $hash = sha1(time() . 'testRotateFileLog');
+        CakeLog::write('test_rotate_log_type', $hash);
+        if (preg_match('/^2\.1\./', Configure::version())) {
+            // CakePHP 2.1.x
+            $prefix = 'test_rotate_log_type_';
+        } else {
+            $prefix = 'test_debug_';
+        }
+        $logPath = LOGS . $prefix . date('Ymd') . '.log';
+        $this->assertTrue(file_exists($logPath));
+
+        clearstatcache();
+        $perms = substr(sprintf('%o', fileperms($logPath)), -4);
+        $this->assertIdentical($perms, '0777');
+
         @unlink($logPath);
     }
 }

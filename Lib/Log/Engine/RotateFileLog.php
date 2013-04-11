@@ -70,7 +70,21 @@ class RotateFileLog extends FileLog {
 
         $currentMask = umask();
         umask(0);
-        $log = new File($filename, true);
+        $log = new File($filename, false);
+
+        if (!$log->exists()) {
+            if (!empty($this->_mode)) { // 2.1.x compatible
+                $mode = $this->_mode;
+            } elseif (isset($this->_config)) {
+                $mode = $this->_config['mode'];
+            } else {
+                $mode = 0644;
+            }
+            if (!$log->safe($filename) || !$log->create() || !chmod($filename, $mode)) {
+                umask($currentMask);
+                return false;
+            }
+        }
 
         // Write Log
         if (!$log->writable()) {
@@ -78,14 +92,7 @@ class RotateFileLog extends FileLog {
             return false;
         }
 
-        if (!empty($this->_mode)) { // 2.1.x compatible
-            $mode = $this->_mode;
-        } elseif (isset($this->_config)) {
-            $mode = $this->_config['mode'];
-        } else {
-            $mode = 0644;
-        }
-        if (!$log->append($output) || !chmod($filename, $mode)) {
+        if (!$log->append($output)) {
             umask($currentMask);
             return false;
         }
