@@ -1,6 +1,7 @@
 <?php
 App::uses('CakeLogInterface', 'Log');
 App::uses('FileLog', 'Log/Engine');
+require_once(dirname(__FILE__) . '/../../../vendor/autoload.php');
 
 /**
  * File Storage stream for Logging with log rotate

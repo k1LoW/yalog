@@ -52,10 +52,6 @@ class S3LogTestCase extends CakeTestCase {
      *
      */
     public function testS3Log(){
-        if(!App::import('Vendor', 'AWSSDKforPHP', array('file' => 'pear/AWSSDKforPHP/sdk.class.php')) && !class_exists('AmazonS3')) {
-            return;
-        }
-
         CakeLog::config('test_s3_log', array(
                 'engine' => 'Yalog.S3Log',
                 'type' => array('test_s3_log_type'),
@@ -78,7 +74,7 @@ class S3LogTestCase extends CakeTestCase {
             $logPath = LOGS . $prefix . date('Ymd', strtotime('-' . $i . 'day')) . '.log';
             file_put_contents($logPath, $hash);
         }
-        $this->assertIdentical(count(glob(LOGS . $prefix . '*.log')), 6);
+        $this->assertIdentical(count(glob(LOGS . $prefix . '*.log')), 5);
 
         CakeLog::write('test_s3_log_type', $hash);
         $logPath = LOGS . $prefix . date('Ymd') . '.log';

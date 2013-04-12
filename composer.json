@@ -1,6 +1,7 @@
 {
     "name": "Yalog",
     "require": {
+        "amazonwebservices/aws-sdk-for-php": "1.*",
         "fluent/logger": "v0.3.6"
     }
 }
