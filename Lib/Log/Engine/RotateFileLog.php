@@ -63,7 +63,8 @@ class RotateFileLog extends FileLog {
         }
 
         $this->_prefix = preg_replace('/\.([^\.]+)$/', '', $filename);
-        $extension = end(explode('.', $filename));
+        $exploded = explode('.', $filename);
+        $extension = end($exploded);
 
         $filename = $this->_path . $this->_prefix . '_' . $this->_suffix . (!empty($extension) ? '.' . $extension : '');
         $output = date('Y-m-d H:i:s') . ' ' . ucfirst($type) . ': ' . $message . "\n";
