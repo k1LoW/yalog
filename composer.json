@@ -14,7 +14,7 @@
     ],
     "require": {
         "composer/installers": "*",
-        "amazonwebservices/aws-sdk-for-php": "1.*",
+        "aws/aws-sdk-php": "*",
         "fluent/logger": "v0.3.6"
     }
 }
