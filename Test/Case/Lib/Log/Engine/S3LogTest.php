@@ -60,7 +60,7 @@ class S3LogTestCase extends CakeTestCase {
         Configure::write('Yalog.S3Log.key', AWS_ACCESS_KEY);
         Configure::write('Yalog.S3Log.secret', AWS_SECRET_ACCESS_KEY);
         Configure::write('Yalog.S3Log.bucket', AWS_S3_BUCKET);
-        Configure::write('Yalog.S3Log.region', AmazonS3::REGION_TOKYO);
+        Configure::write('Yalog.S3Log.region', Aws\Common\Enum\Region::TOKYO);
         Configure::write('Yalog.S3Log.urlPrefix', 'test_logs/');
 
         $hash = sha1(time() . 'testS3Log');

@@ -3,6 +3,12 @@ App::uses('CakeLogInterface', 'Log');
 App::uses('FileLog', 'Log/Engine');
 require_once(dirname(__FILE__) . '/../../../vendor/autoload.php');
 
+use Aws\S3\S3Client;
+use Aws\Common\Enum\Region;
+use Aws\S3\Enum\CannedAcl;
+use Aws\S3\Exception\S3Exception;
+use Guzzle\Http\EntityBody;
+
 /**
  * File Storage stream for Logging with log rotate
  *
@@ -88,38 +94,41 @@ class S3Log extends FileLog {
      * @param $filePath
      */
     private function _moveLogS3($filePath){
-        if (!class_exists('AmazonS3')
+        if (!class_exists('Aws\S3\S3Client')
             || !Configure::read('Yalog.S3Log.key')
             || !Configure::read('Yalog.S3Log.secret')
             || !Configure::read('Yalog.S3Log.bucket')) {
             return false;
         }
         $fileName = preg_replace('/' . $this->_bufferPrefix . '/', '', basename($filePath));
-        $options = array('key' => Configure::read('Yalog.S3Log.key'),
-                         'secret' => Configure::read('Yalog.S3Log.secret'),
-                         );
+        $options = array(
+            'key' => Configure::read('Yalog.S3Log.key'),
+            'secret' => Configure::read('Yalog.S3Log.secret'),
+        );
         $bucket = Configure::read('Yalog.S3Log.bucket');
-        $s3 = new AmazonS3($options);
+        $s3 = S3Client::factory($options);
         $region = Configure::read('Yalog.S3Log.region');
         if (!empty($region)) {
-            $s3->set_region($region);
+            $s3->setRegion($region);
         }
         $acl = Configure::read('Yalog.S3Log.acl');
         if (empty($acl)) {
-            $acl = AmazonS3::ACL_PRIVATE;
+            $acl = CannedAcl::PUBLIC_READ;
         }
         $urlPrefix = Configure::read('Yalog.S3Log.urlPrefix');
-        $responce = $s3->create_object($bucket,
-                                       $urlPrefix . $fileName,
-                                       array(
-                                             'fileUpload' => $filePath,
-                                             'acl' => $acl,
-                                             ));
-        if (!$responce->isOK()) {
-            //__('Validation Error: S3 Upload Error');
+
+        try {
+            $result = $s3->putObject(array(
+                'Bucket' => $bucket,
+                'Key' => $urlPrefix . $fileName,
+                'Body' => EntityBody::factory(fopen($filePath, 'r')),
+                'ACL' => $acl,
+            ));
+            $deleteLog = new File($filePath, true);
+            return $deleteLog->delete();
+        } catch (S3Exception $e) {
+            throw new S3Exception($e->getMessage());
             return false;
         }
-        $deleteLog = new File($filePath, true);
-        return $deleteLog->delete();
     }
 }
